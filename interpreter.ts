@@ -1,7 +1,10 @@
 import type { AstTemplate } from "./ast.ts";
 import { parse } from "./parse.ts";
-import type { Runtime } from "./runtime.ts";
-import type { FormatParameters, FormatParameterValue } from "./types.ts";
+import type {
+  FormatParameters,
+  FormatParameterValue,
+  Runtime,
+} from "./types.ts";
 
 export class Interpreter implements Runtime {
   execute(

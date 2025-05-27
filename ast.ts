@@ -1,3 +1,8 @@
+/**
+ * @internal
+ * @module
+ */
+
 export type AstTemplate = [strings: string[], values: AstTemplateValue[]];
 
 export type AstTemplateValue = [name: string, methods: AstMethod[]];

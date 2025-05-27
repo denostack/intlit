@@ -1,7 +1,13 @@
-import { AstArg, AstMethod, AstTemplate, AstTemplateValue } from "./ast.ts";
+import type {
+  AstArg,
+  AstMethod,
+  AstTemplate,
+  AstTemplateValue,
+} from "./ast.ts";
 
 type Context = [text: string, i: number, depth: number];
 
+/** @internal */
 export function parse(
   text: string,
 ): AstTemplate {

@@ -1,24 +1,38 @@
-import type { Plugin } from "./plugin.ts";
-import type { Runtime } from "./runtime.ts";
-import type { FormatParameters, FormatParameterValue } from "./types.ts";
+import { Interpreter } from "./interpreter.ts";
+import type {
+  FormatParameters,
+  FormatParameterValue,
+  Plugin,
+  Runtime,
+} from "./types.ts";
+
+export interface FormatterOptions {
+  locale?: string;
+  runtime?: Runtime;
+  plugin?: Plugin;
+}
 
 export class Formatter {
-  constructor(
-    readonly runtime: Runtime,
-    readonly plugin: Plugin = {},
-  ) {
+  readonly locale: string;
+  readonly runtime: Runtime;
+  readonly plugin: Plugin;
+
+  constructor(options: FormatterOptions = {}) {
+    this.locale = options.locale ?? "en";
+    this.runtime = options.runtime ?? new Interpreter();
+    this.plugin = options.plugin ?? {};
   }
 
   format(text: string, parameters: FormatParameters = {}) {
     return this.runtime.execute(
       text,
       parameters,
-      createDecorator(this.plugin),
+      createDecorator(this.locale, this.plugin),
     );
   }
 }
 
-function createDecorator(plugin: Plugin) {
+function createDecorator(locale: string, plugin: Plugin) {
   return (self: FormatParameterValue) => {
     let current = self;
     const metadata = {} as Record<string, unknown>;
@@ -35,6 +49,7 @@ function createDecorator(plugin: Plugin) {
               current,
               args,
               metadata,
+              locale,
             });
             return decorated;
           };

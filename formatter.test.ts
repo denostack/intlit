@@ -1,9 +1,8 @@
 import { assertEquals } from "@std/assert";
 import { Formatter } from "./formatter.ts";
-import { Interpreter } from "./interpreter.ts";
 
 Deno.test("formatter, very simple text", () => {
-  const formatter = new Formatter(new Interpreter());
+  const formatter = new Formatter();
 
   assertEquals(
     formatter.format("Hello World"),
@@ -12,7 +11,7 @@ Deno.test("formatter, very simple text", () => {
 });
 
 Deno.test("formatter, basic template value", () => {
-  const formatter = new Formatter(new Interpreter());
+  const formatter = new Formatter();
 
   assertEquals(
     formatter.format("Hello {target}", {
@@ -23,12 +22,14 @@ Deno.test("formatter, basic template value", () => {
 });
 
 Deno.test("formatter, template value with method", () => {
-  const formatter = new Formatter(new Interpreter(), {
-    이({ current: self }) {
-      if (self === "사과") {
-        return "사과가";
-      }
-      return `${self}이`;
+  const formatter = new Formatter({
+    plugin: {
+      이({ current: self }) {
+        if (self === "사과") {
+          return "사과가";
+        }
+        return `${self}이`;
+      },
     },
   });
 
@@ -47,33 +48,35 @@ Deno.test("formatter, template value with method", () => {
 });
 
 Deno.test("formatter, template with method that returns template", () => {
-  const formatter = new Formatter(new Interpreter(), {
-    one({ self, args, metadata }) {
-      if (self == 1) {
-        metadata.matched = true;
-        return typeof args[0] === "function" ? args[0]() : args[0];
-      }
-      return "";
-    },
-    other({ current, args, metadata }) {
-      if (!metadata.matched) {
-        return typeof args[0] === "function" ? args[0]() : args[0];
-      }
-      return current;
-    },
-    male({ self, args, metadata }) {
-      if (self === "male") {
-        metadata.matched = true;
-        return typeof args[0] === "function" ? args[0]() : args[0];
-      }
-      return "";
-    },
-    female({ self, args, metadata }) {
-      if (self === "female") {
-        metadata.matched = true;
-        return typeof args[0] === "function" ? args[0]() : args[0];
-      }
-      return "";
+  const formatter = new Formatter({
+    plugin: {
+      one({ self, args, metadata }) {
+        if (self == 1) {
+          metadata.matched = true;
+          return typeof args[0] === "function" ? args[0]() : args[0];
+        }
+        return "";
+      },
+      other({ current, args, metadata }) {
+        if (!metadata.matched) {
+          return typeof args[0] === "function" ? args[0]() : args[0];
+        }
+        return current;
+      },
+      male({ self, args, metadata }) {
+        if (self === "male") {
+          metadata.matched = true;
+          return typeof args[0] === "function" ? args[0]() : args[0];
+        }
+        return "";
+      },
+      female({ self, args, metadata }) {
+        if (self === "female") {
+          metadata.matched = true;
+          return typeof args[0] === "function" ? args[0]() : args[0];
+        }
+        return "";
+      },
     },
   });
 
