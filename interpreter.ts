@@ -21,7 +21,7 @@ export class Interpreter implements Runtime {
     decorateValue?: (value: FormatParameterValue) => unknown,
   ): string {
     const [strings, values] = ast;
-    let result = strings.at(0) ?? "";
+    let result = strings[0] ?? "";
     values.forEach(([valueName, methods], valueIndex) => {
       const self = parameters[valueName];
 
@@ -50,7 +50,7 @@ export class Interpreter implements Runtime {
       }
 
       result += value && value.toString ? value.toString() : (value ?? "");
-      result += strings.at(valueIndex + 1) ?? "";
+      result += strings[valueIndex + 1] ?? "";
     });
     return result;
   }
