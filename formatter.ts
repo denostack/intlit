@@ -23,7 +23,7 @@ export class Formatter {
     this.plugin = options.plugin ?? {};
   }
 
-  format(text: string, parameters: FormatParameters = {}) {
+  format(text: string, parameters: FormatParameters = {}): string {
     return this.runtime.execute(
       text,
       parameters,

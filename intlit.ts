@@ -17,7 +17,7 @@ export class Intlit<Messages extends Record<string, string>> {
   format<MessageId extends keyof Messages>(
     text: MessageId,
     parameters: FormatParameters = {},
-  ) {
+  ): string {
     return this.formatter.format(this.messages[text] ?? text, parameters);
   }
 }
