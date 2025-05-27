@@ -1,19 +1,28 @@
 import type { AstTemplate } from "./ast.ts";
 import { parse } from "./parse.ts";
 import type { Runtime } from "./runtime.ts";
+import type { FormatParameters, FormatParameterValue } from "./types.ts";
 
 export class Interpreter implements Runtime {
-  execute(text: string, args: Record<string, unknown>): string {
-    return this.executeAst(parse(text), args);
+  execute(
+    text: string,
+    parameters: FormatParameters,
+    decorateValue?: (value: FormatParameterValue) => unknown,
+  ): string {
+    return this.executeAst(parse(text), parameters, decorateValue);
   }
 
-  executeAst(ast: AstTemplate, args: Record<string, unknown>): string {
+  executeAst(
+    ast: AstTemplate,
+    parameters: FormatParameters,
+    decorateValue?: (value: FormatParameterValue) => unknown,
+  ): string {
     const [strings, values] = ast;
     let result = strings.at(0) ?? "";
     values.forEach(([valueName, methods], valueIndex) => {
-      const self = args[valueName];
+      const self = parameters[valueName];
 
-      let value = self;
+      let value = decorateValue ? decorateValue(self) : self;
       for (const [methodName, methodArgs] of methods) {
         const method = getSafeMethod(value, methodName);
         if (method) {
@@ -26,7 +35,7 @@ export class Interpreter implements Runtime {
                   return methodArg[1];
                 case 4:
                   return () =>
-                    this.executeAst(methodArg[1], { _: self, ...args });
+                    this.executeAst(methodArg[1], { _: self, ...parameters });
                 default:
                   throw new Error(
                     `Unknown method argument type: ${methodArg[0]}`,

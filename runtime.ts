@@ -1,3 +1,9 @@
+import type { FormatParameters, FormatParameterValue } from "./types.ts";
+
 export interface Runtime {
-  execute(text: string, args: Record<string, unknown>): string;
+  execute(
+    text: string,
+    parameters: FormatParameters,
+    decorateValue?: (value: FormatParameterValue) => unknown,
+  ): string;
 }

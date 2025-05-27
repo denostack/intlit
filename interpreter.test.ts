@@ -1,5 +1,6 @@
 import { assertEquals } from "@std/assert";
 import { Interpreter } from "./interpreter.ts";
+import type { FormatParameterValue } from "./types.ts";
 
 Deno.test("interpreter, very simple text", () => {
   const runtime = new Interpreter();
@@ -32,7 +33,7 @@ Deno.test("interpreter, basic template value", () => {
 Deno.test("interpreter, template value with method", () => {
   const runtime = new Interpreter();
 
-  const createArgs = (name: string) => ({
+  const createParams = (name: FormatParameterValue) => ({
     _: name,
     이() {
       this._ += "이";
@@ -57,7 +58,8 @@ Deno.test("interpreter, template value with method", () => {
           ]],
         ],
       ],
-      { name: createArgs("파일") },
+      { name: "파일" },
+      createParams,
     ),
     "파일이 없습니다.",
   );
@@ -73,7 +75,8 @@ Deno.test("interpreter, template value with method", () => {
           ]],
         ],
       ],
-      { name: createArgs("파일") },
+      { name: "파일" },
+      createParams,
     ),
     "파일이가 없습니다.",
   );
@@ -126,19 +129,20 @@ Deno.test("interpreter, template with method that returns template", () => {
       ],
     ], {
       user: "Alex",
-      photoCount: {
+      photoCount: 8,
+      userGender: "female",
+    }, (value) => {
+      return {
         other(next: () => string) {
           return next();
         },
-        toString() {
-          return "8";
-        },
-      },
-      userGender: {
         female(next: () => string) {
           return next();
         },
-      },
+        toString() {
+          return `${value}`;
+        },
+      };
     }),
     "Alex added 8 new photos to her steam.",
   );
