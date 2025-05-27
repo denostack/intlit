@@ -97,8 +97,8 @@ Deno.test("parse, template value with method", () => {
 Deno.test("parse, template with method that returns template", () => {
   for (
     const text of [
-      "{user} added {photoCount.one:}a new photo{.other:}{_} new photos {/} to {userGender.male:}his{.female:}her{.other:}their{/} steam.",
-      "{ user } added { photoCount . one : }a new photo{ . other : }{ _ } new photos { / } to { userGender . male : }his{ . female : }her{ . other : }their{ / } steam.",
+      "{user} added {photoCount.one:}a new photo{.other:}{_} new photos{/} to {userGender.male:}his{.female:}her{.other:}their{/} steam.",
+      "{ user } added { photoCount . one : }a new photo{ . other : }{ _ } new photos{ / } to { userGender . male : }his{ . female : }her{ . other : }their{ / } steam.",
     ]
   ) {
     assertEquals(
@@ -112,7 +112,7 @@ Deno.test("parse, template with method that returns template", () => {
               [4, [["a new photo"], []]],
             ]],
             ["other", [
-              [4, [["", " new photos "], [["_", []]]]],
+              [4, [["", " new photos"], [["_", []]]]],
             ]],
           ]],
           ["userGender", [

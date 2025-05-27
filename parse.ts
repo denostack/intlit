@@ -1,16 +1,4 @@
-export type AstTemplate = [strings: string[], values: AstTemplateValue[]];
-
-export type AstTemplateValue = [name: string, methods: AstMethod[]];
-
-export type AstMethod = [name: string, args: AstAny[]];
-
-export type AstAny = AstArgNumber | AstArgString | AstArgTemplate;
-
-export type AstArgNumber = [type: 2, value: number];
-export type AstArgString = [type: 3, value: string];
-export type AstArgTemplate = [type: 4, value: AstTemplate];
-
-// export type AstComment = [type: 16];
+import { AstArg, AstMethod, AstTemplate, AstTemplateValue } from "./ast.ts";
 
 type Context = [text: string, i: number, depth: number];
 
@@ -87,7 +75,7 @@ function parseTemplate(ctx: Context): [TemplateReturn, AstTemplate] {
 }
 
 function parseTemplateValue(ctx: Context): AstTemplateValue {
-  const name = varname(ctx);
+  const name = parseVarname(ctx);
   const methods: AstMethod[] = [];
 
   white(ctx);
@@ -112,8 +100,8 @@ function parseTemplateValue(ctx: Context): AstTemplateValue {
 function parseMethod(
   ctx: Context,
 ): [TemplateReturn.NEXT | TemplateReturn.BREAK, AstMethod] {
-  const methodName = varname(ctx);
-  const args: AstAny[] = [];
+  const methodName = parseVarname(ctx);
+  const args: AstArg[] = [];
   white(ctx);
 
   if (eat(ctx, ":")) {
@@ -139,7 +127,7 @@ function parseMethod(
 const RE_VARNAME =
   /^[$_\p{Lu}\p{Ll}\p{Lt}\p{Lm}\p{Lo}\p{Nl}][$_\p{Lu}\p{Ll}\p{Lt}\p{Lm}\p{Lo}\p{Nl}\u200C\u200D\p{Mn}\p{Mc}\p{Nd}\p{Pc}]*/u;
 
-function varname(ctx: Context): string {
+function parseVarname(ctx: Context): string {
   const match = ctx[0].slice(ctx[1]).match(RE_VARNAME);
   if (!match) {
     throw createSyntaxError(ctx);
