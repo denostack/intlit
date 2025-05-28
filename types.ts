@@ -1,23 +1,23 @@
-export type FormatParameterValue = string | number | bigint | boolean | null;
-export type FormatParameters = Record<string, FormatParameterValue>;
+export type PrimitiveType = string | number | boolean | null | undefined | Date;
+export type FormatParameters = Record<string, PrimitiveType>;
 
 export interface Runtime {
   execute(
     text: string,
     parameters: FormatParameters,
-    decorateValue?: (value: FormatParameterValue) => unknown,
+    decorateValue?: (value: PrimitiveType) => unknown,
   ): string;
 }
 
 export interface PluginContext {
   locale: string;
-  self: FormatParameterValue;
-  current: FormatParameterValue;
+  self: PrimitiveType;
+  current: PrimitiveType;
   args: (string | number | (() => string))[];
   metadata: Record<string | symbol, unknown>;
 }
 
-export type PluginHook = (ctx: PluginContext) => FormatParameterValue;
+export type PluginHook = (ctx: PluginContext) => PrimitiveType;
 
 export interface Plugin {
   [name: string]: PluginHook;

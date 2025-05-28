@@ -1,9 +1,9 @@
 export type {
   FormatParameters,
-  FormatParameterValue,
   Plugin,
   PluginContext,
   PluginHook,
+  PrimitiveType,
   Runtime,
 } from "./types.ts";
 

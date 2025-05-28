@@ -1,6 +1,6 @@
 import { assertEquals } from "@std/assert";
 import { Interpreter } from "./interpreter.ts";
-import type { FormatParameterValue } from "./types.ts";
+import type { PrimitiveType } from "./types.ts";
 
 Deno.test("interpreter, very simple text", () => {
   const runtime = new Interpreter();
@@ -33,7 +33,7 @@ Deno.test("interpreter, basic template value", () => {
 Deno.test("interpreter, template value with method", () => {
   const runtime = new Interpreter();
 
-  const createParams = (name: FormatParameterValue) => ({
+  const createParams = (name: PrimitiveType) => ({
     _: name,
     이() {
       this._ += "이";

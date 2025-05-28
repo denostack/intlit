@@ -1,10 +1,6 @@
 import type { AstTemplate } from "./ast.ts";
 import { parse } from "./parse.ts";
-import type {
-  FormatParameters,
-  FormatParameterValue,
-  Runtime,
-} from "./types.ts";
+import type { FormatParameters, PrimitiveType, Runtime } from "./types.ts";
 
 export class Interpreter implements Runtime {
   _cache: Map<string, AstTemplate> = new Map();
@@ -12,7 +8,7 @@ export class Interpreter implements Runtime {
   execute(
     text: string,
     parameters: FormatParameters,
-    decorateValue?: (value: FormatParameterValue) => unknown,
+    decorateValue?: (value: PrimitiveType) => unknown,
   ): string {
     let ast = this._cache.get(text);
     if (!ast) {
@@ -25,7 +21,7 @@ export class Interpreter implements Runtime {
   executeAst(
     ast: AstTemplate,
     parameters: FormatParameters,
-    decorateValue?: (value: FormatParameterValue) => unknown,
+    decorateValue?: (value: PrimitiveType) => unknown,
   ): string {
     const [strings, values] = ast;
     let result = strings[0] ?? "";

@@ -1,8 +1,8 @@
 import { Interpreter } from "./interpreter.ts";
 import type {
   FormatParameters,
-  FormatParameterValue,
   Plugin,
+  PrimitiveType,
   Runtime,
 } from "./types.ts";
 
@@ -33,7 +33,7 @@ export class Formatter {
 }
 
 function createDecorator(locale: string, plugin: Plugin) {
-  return (self: FormatParameterValue) => {
+  return (self: PrimitiveType) => {
     let current = self;
     const metadata = {} as Record<string, unknown>;
     const decorated = new Proxy({}, {
