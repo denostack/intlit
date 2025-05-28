@@ -1,5 +1,5 @@
-import { parse } from "./parse.ts";
 import { assertEquals, assertThrows } from "@std/assert";
+import { parse } from "./parse.ts";
 
 Deno.test("parse, very simple text", () => {
   assertEquals(
@@ -67,27 +67,27 @@ Deno.test("parse, basic template value", () => {
 Deno.test("parse, template value with method", () => {
   assertEquals(
     parse(
-      "{name.이} 없습니다.",
+      "Hello {name.upper}!",
     ),
     [
-      ["", " 없습니다."],
+      ["Hello ", "!"],
       [
         ["name", [
-          ["이", []],
+          ["upper", []],
         ]],
       ],
     ],
   );
   assertEquals(
     parse(
-      "{name.이.가} 없습니다.",
+      "Hello {name.upper.trim}!",
     ),
     [
-      ["", " 없습니다."],
+      ["Hello ", "!"],
       [
         ["name", [
-          ["이", []],
-          ["가", []],
+          ["upper", []],
+          ["trim", []],
         ]],
       ],
     ],

@@ -1,106 +1,95 @@
-import { assertEquals } from "@std/assert";
+import { assertEquals } from "@std/assert/assert-equals";
 import { Formatter } from "./formatter.ts";
+import { defaultHooks } from "./plugins/default.ts";
 
-Deno.test("formatter, very simple text", () => {
-  const formatter = new Formatter();
-
-  assertEquals(
-    formatter.format("Hello World"),
-    "Hello World",
-  );
-});
-
-Deno.test("formatter, basic template value", () => {
-  const formatter = new Formatter();
-
-  assertEquals(
-    formatter.format("Hello {target}", {
-      target: "World!",
-    }),
-    "Hello World!",
-  );
-});
-
-Deno.test("formatter, template value with method", () => {
-  const formatter = new Formatter({
-    plugin: {
-      이({ current: self }) {
-        if (self === "사과") {
-          return "사과가";
-        }
-        return `${self}이`;
-      },
+Deno.test("formatter, plural", () => {
+  const messages = {
+    ko: {
+      "You have {count} file{count.other:}s{/}.":
+        "{count}개의 파일이 있습니다.",
     },
-  });
-
-  assertEquals(
-    formatter.format("{name.이} 없습니다.", {
-      name: "파일",
-    }),
-    "파일이 없습니다.",
-  );
-  assertEquals(
-    formatter.format("{name.이} 없습니다.", {
-      name: "사과",
-    }),
-    "사과가 없습니다.",
-  );
-});
-
-Deno.test("formatter, template with method that returns template", () => {
-  const formatter = new Formatter({
-    plugin: {
-      one({ self, args, metadata }) {
-        if (self == 1) {
-          metadata.matched = true;
-          return typeof args[0] === "function" ? args[0]() : args[0];
-        }
-        return "";
-      },
-      other({ current, args, metadata }) {
-        if (!metadata.matched) {
-          return typeof args[0] === "function" ? args[0]() : args[0];
-        }
-        return current;
-      },
-      male({ self, args, metadata }) {
-        if (self === "male") {
-          metadata.matched = true;
-          return typeof args[0] === "function" ? args[0]() : args[0];
-        }
-        return "";
-      },
-      female({ self, args, metadata }) {
-        if (self === "female") {
-          metadata.matched = true;
-          return typeof args[0] === "function" ? args[0]() : args[0];
-        }
-        return "";
-      },
+    ar: {
+      "You have {count} file{count.other:}s{/}.":
+        "{count.zero:}لا يوجد لديك ملفات.{.one:}لديك ملف واحد.{.two:}لديك ملفان.{.few:}لديك {count} ملفات قليلة.{.many:}لديك {count} ملفات كثيرة.{.other:}لديك {count} ملفات.{/}",
     },
-  });
+  };
 
-  assertEquals(
-    formatter.format(
-      "{user} added {photoCount.one:}a new photo{.other:}{_} new photos{/} to {userGender.male:}his{.female:}her{.other:}their{/} steam.",
-      {
-        user: "Alex",
-        photoCount: 3,
-        userGender: "female",
-      },
-    ),
-    "Alex added 3 new photos to her steam.",
-  );
+  {
+    const formatter = new Formatter({
+      locale: "en",
+      hooks: defaultHooks,
+    });
 
-  assertEquals(
-    formatter.format(
-      "{user} added {photoCount.one:}a new photo{.other:}{_} new photos{/} to {userGender.male:}his{.female:}her{.other:}their{/} steam.",
-      {
-        user: "Alex",
-        photoCount: 1,
-        userGender: "unknown",
-      },
-    ),
-    "Alex added a new photo to their steam.",
-  );
+    assertEquals(
+      formatter.format("You have {count} file{count.other:}s{/}.", {
+        count: 1,
+      }),
+      "You have 1 file.",
+    );
+    assertEquals(
+      formatter.format("You have {count} file{count.other:}s{/}.", {
+        count: 2,
+      }),
+      "You have 2 files.",
+    );
+  }
+
+  {
+    const formatter = new Formatter({
+      locale: "ko",
+      hooks: defaultHooks,
+      messages: messages.ko,
+    });
+
+    assertEquals(
+      formatter.format("You have {count} file{count.other:}s{/}.", {
+        count: 1,
+      }),
+      "1개의 파일이 있습니다.",
+    );
+  }
+  {
+    const formatter = new Formatter({
+      locale: "ar",
+      hooks: defaultHooks,
+      messages: messages.ar,
+    });
+
+    assertEquals(
+      formatter.format("You have {count} file{count.other:}s{/}.", {
+        count: 0,
+      }),
+      "لا يوجد لديك ملفات.",
+    );
+    assertEquals(
+      formatter.format("You have {count} file{count.other:}s{/}.", {
+        count: 1,
+      }),
+      "لديك ملف واحد.",
+    );
+    assertEquals(
+      formatter.format("You have {count} file{count.other:}s{/}.", {
+        count: 2,
+      }),
+      "لديك ملفان.",
+    );
+    assertEquals(
+      formatter.format("You have {count} file{count.other:}s{/}.", {
+        count: 3,
+      }),
+      "لديك 3 ملفات قليلة.",
+    );
+    assertEquals(
+      formatter.format("You have {count} file{count.other:}s{/}.", {
+        count: 11,
+      }),
+      "لديك 11 ملفات كثيرة.",
+    );
+    assertEquals(
+      formatter.format("You have {count} file{count.other:}s{/}.", {
+        count: 100,
+      }),
+      "لديك 100 ملفات.",
+    );
+  }
 });

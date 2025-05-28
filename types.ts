@@ -1,24 +1,27 @@
 export type PrimitiveType = string | number | boolean | null | undefined | Date;
 export type FormatParameters = Record<string, PrimitiveType>;
 
+export type HookArg = string | number | (() => string);
+
 export interface Runtime {
   execute(
     text: string,
     parameters: FormatParameters,
-    decorateValue?: (value: PrimitiveType) => unknown,
   ): string;
 }
 
-export interface PluginContext {
-  locale: string;
-  self: PrimitiveType;
-  current: PrimitiveType;
-  args: (string | number | (() => string))[];
+export interface HookContext {
+  out: string | null;
   metadata: Record<string | symbol, unknown>;
 }
 
-export type PluginHook = (ctx: PluginContext) => PrimitiveType;
-
-export interface Plugin {
-  [name: string]: PluginHook;
+export interface HookInfo {
+  locale: string | null;
 }
+
+export type Hook = (
+  source: PrimitiveType,
+  args: HookArg[],
+  ctx: HookContext,
+  info: HookInfo,
+) => string | null;

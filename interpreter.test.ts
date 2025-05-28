@@ -1,9 +1,9 @@
 import { assertEquals } from "@std/assert";
 import { Interpreter } from "./interpreter.ts";
-import type { PrimitiveType } from "./types.ts";
+import { defaultHooks } from "./plugins/default.ts";
 
 Deno.test("interpreter, very simple text", () => {
-  const runtime = new Interpreter();
+  const runtime = new Interpreter({});
 
   assertEquals(
     runtime.executeAst([
@@ -15,7 +15,7 @@ Deno.test("interpreter, very simple text", () => {
 });
 
 Deno.test("interpreter, basic template value", () => {
-  const runtime = new Interpreter();
+  const runtime = new Interpreter({});
 
   assertEquals(
     runtime.executeAst([
@@ -31,76 +31,61 @@ Deno.test("interpreter, basic template value", () => {
 });
 
 Deno.test("interpreter, template value with method", () => {
-  const runtime = new Interpreter();
-
-  const createParams = (name: PrimitiveType) => ({
-    _: name,
-    이() {
-      this._ += "이";
-      return this;
-    },
-    가() {
-      this._ += "가";
-      return this;
-    },
-    toString() {
-      return this._;
-    },
+  const runtime = new Interpreter({
+    upper: (source, _, ctx) => `${ctx.out ?? source}`.toUpperCase(),
+    trim: (source, _, ctx) => `${ctx.out ?? source}`.trim(),
   });
 
   assertEquals(
     runtime.executeAst(
       [
-        ["", " 없습니다."],
+        ["Hello ", "!"],
         [
           ["name", [
-            ["이", []],
+            ["upper", []],
           ]],
         ],
       ],
-      { name: "파일" },
-      createParams,
+      { name: "Alex" },
     ),
-    "파일이 없습니다.",
+    "Hello ALEX!",
   );
 
   assertEquals(
     runtime.executeAst(
       [
-        ["", " 없습니다."],
+        ["Hello ", "!"],
         [
           ["name", [
-            ["이", []],
-            ["가", []],
+            ["upper", []],
+            ["trim", []],
           ]],
         ],
       ],
-      { name: "파일" },
-      createParams,
+      { name: "  Alex" },
     ),
-    "파일이가 없습니다.",
+    "Hello ALEX!",
   );
 
   // undefined method
   assertEquals(
     runtime.executeAst(
       [
-        ["", " 없습니다."],
+        ["Hello ", "!"],
         [
           ["name", [
-            ["이", []],
-            ["가", []],
+            ["unknown", []],
           ]],
         ],
       ],
-      { name: "파일" },
+      { name: "Alex" },
     ),
-    "파일 없습니다.",
+    "Hello Alex!",
   );
 });
 
 Deno.test("interpreter, template with method that returns template", () => {
-  const runtime = new Interpreter();
+  const runtime = new Interpreter(defaultHooks);
 
   assertEquals(
     runtime.executeAst([
@@ -131,18 +116,6 @@ Deno.test("interpreter, template with method that returns template", () => {
       user: "Alex",
       photoCount: 8,
       userGender: "female",
-    }, (value) => {
-      return {
-        other(next: () => string) {
-          return next();
-        },
-        female(next: () => string) {
-          return next();
-        },
-        toString() {
-          return `${value}`;
-        },
-      };
     }),
     "Alex added 8 new photos to her steam.",
   );

@@ -1,34 +1,41 @@
 import type { AstTemplate } from "./ast.ts";
 import { parse } from "./parse.ts";
-import type { FormatParameters, PrimitiveType, Runtime } from "./types.ts";
+import type {
+  FormatParameters,
+  Hook,
+  HookArg,
+  HookContext,
+  HookInfo,
+  PrimitiveType,
+  Runtime,
+} from "./types.ts";
 
 export class Interpreter implements Runtime {
   _cache: Map<string, AstTemplate> = new Map();
+  _decorator: (source: PrimitiveType) => unknown;
 
-  execute(
-    text: string,
-    parameters: FormatParameters,
-    decorateValue?: (value: PrimitiveType) => unknown,
-  ): string {
+  constructor(hooks: Record<string, Hook>, locale?: string | null) {
+    this._decorator = createDecorator(hooks, {
+      locale: locale ?? null,
+    });
+  }
+
+  execute(text: string, parameters: FormatParameters): string {
     let ast = this._cache.get(text);
     if (!ast) {
       ast = parse(text);
       this._cache.set(text, ast);
     }
-    return this.executeAst(ast, parameters, decorateValue);
+    return this.executeAst(ast, parameters);
   }
 
-  executeAst(
-    ast: AstTemplate,
-    parameters: FormatParameters,
-    decorateValue?: (value: PrimitiveType) => unknown,
-  ): string {
+  executeAst(ast: AstTemplate, parameters: FormatParameters): string {
     const [strings, values] = ast;
     let result = strings[0] ?? "";
     values.forEach(([valueName, methods], valueIndex) => {
       const self = parameters[valueName];
 
-      let value = decorateValue ? decorateValue(self) : self;
+      let value = this._decorator(self);
       for (const [methodName, methodArgs] of methods) {
         const method = getSafeMethod(value, methodName);
         if (method) {
@@ -74,4 +81,34 @@ function getSafeMethod(
     ) => unknown).bind(value);
   }
   return null;
+}
+
+function createDecorator(hooks: Record<string, Hook>, info: HookInfo) {
+  return (source: PrimitiveType) => {
+    const ctx: HookContext = {
+      out: null,
+      metadata: {},
+    };
+    const decoratedSource = new Proxy({
+      toString() {
+        return ctx.out ?? `${source}`;
+      },
+    }, {
+      get(target, prop) {
+        if (prop in target) {
+          return target[prop as keyof typeof target];
+        }
+        if (prop in hooks) {
+          const hook = hooks[prop as string];
+          return (...args: HookArg[]) => {
+            const nextOut = hook(source, args, ctx, info);
+            ctx.out = nextOut;
+            return decoratedSource;
+          };
+        }
+        return undefined;
+      },
+    });
+    return decoratedSource;
+  };
 }
