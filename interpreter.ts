@@ -7,12 +7,19 @@ import type {
 } from "./types.ts";
 
 export class Interpreter implements Runtime {
+  _cache: Map<string, AstTemplate> = new Map();
+
   execute(
     text: string,
     parameters: FormatParameters,
     decorateValue?: (value: FormatParameterValue) => unknown,
   ): string {
-    return this.executeAst(parse(text), parameters, decorateValue);
+    let ast = this._cache.get(text);
+    if (!ast) {
+      ast = parse(text);
+      this._cache.set(text, ast);
+    }
+    return this.executeAst(ast, parameters, decorateValue);
   }
 
   executeAst(
