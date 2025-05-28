@@ -1,11 +1,17 @@
 import { Interpreter } from "./interpreter.ts";
 import { defaultHooks } from "./plugins/default.ts";
-import type { FormatParameters, Hook, Runtime } from "./types.ts";
+import type {
+  FormatParameters,
+  Hook,
+  Runtime,
+  TaggedTemplateHandler,
+} from "./types.ts";
 
 export interface FormatterOptions<Messages extends Record<string, string>> {
   locale?: string;
   messages?: Messages;
   hooks?: Record<string, Hook>;
+  taggedTemplate?: TaggedTemplateHandler;
 }
 
 export class Formatter<Messages extends Record<string, string>> {
@@ -13,8 +19,11 @@ export class Formatter<Messages extends Record<string, string>> {
   readonly messages: Messages;
   constructor({ messages, ...options }: FormatterOptions<Messages>) {
     this.runtime = new Interpreter(
-      options.hooks ?? defaultHooks,
-      options.locale,
+      {
+        locale: options.locale,
+        hooks: options.hooks ?? defaultHooks,
+        taggedTemplate: options.taggedTemplate,
+      },
     );
     this.messages = messages ?? {} as Messages;
   }

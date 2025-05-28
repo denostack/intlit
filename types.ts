@@ -25,3 +25,8 @@ export type Hook = (
   ctx: HookContext,
   info: HookInfo,
 ) => string | null;
+
+export type TaggedTemplateHandler = (
+  strings: TemplateStringsArray,
+  ...args: unknown[]
+) => string;

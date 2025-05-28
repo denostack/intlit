@@ -1,4 +1,5 @@
 import { assertEquals } from "@std/assert/assert-equals";
+import { text } from "@kokr/text";
 import { Formatter } from "./formatter.ts";
 
 Deno.test("formatter, plural", () => {
@@ -36,6 +37,7 @@ Deno.test("formatter, plural", () => {
     const formatter = new Formatter({
       locale: "ko",
       messages: messages.ko,
+      taggedTemplate: text,
     });
 
     assertEquals(

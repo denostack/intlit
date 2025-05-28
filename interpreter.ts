@@ -8,16 +8,38 @@ import type {
   HookInfo,
   PrimitiveType,
   Runtime,
+  TaggedTemplateHandler,
 } from "./types.ts";
+
+export interface InterpreterOptions {
+  locale?: string | null;
+  hooks?: Record<string, Hook>;
+  taggedTemplate?: TaggedTemplateHandler;
+}
+
+function defaultTaggedTemplateHandler(
+  strings: TemplateStringsArray,
+  ...args: unknown[]
+): string {
+  return strings.reduce((carry, string, index) => {
+    if (index > 0) {
+      carry += args[index - 1];
+    }
+    return carry + string;
+  });
+}
 
 export class Interpreter implements Runtime {
   _cache: Map<string, AstTemplate> = new Map();
   _decorator: (source: PrimitiveType) => unknown;
+  _taggedTemplate: TaggedTemplateHandler;
 
-  constructor(hooks: Record<string, Hook>, locale?: string | null) {
-    this._decorator = createDecorator(hooks, {
-      locale: locale ?? null,
+  constructor(options: InterpreterOptions = {}) {
+    this._decorator = createDecorator(options.hooks ?? {}, {
+      locale: options.locale ?? null,
     });
+    this._taggedTemplate = options.taggedTemplate ??
+      defaultTaggedTemplateHandler;
   }
 
   execute(text: string, parameters: FormatParameters): string {
@@ -31,38 +53,38 @@ export class Interpreter implements Runtime {
 
   executeAst(ast: AstTemplate, parameters: FormatParameters): string {
     const [strings, values] = ast;
-    let result = strings[0] ?? "";
-    values.forEach(([valueName, methods], valueIndex) => {
-      const self = parameters[valueName];
+    return this._taggedTemplate(
+      Object.assign(strings, { raw: strings }),
+      ...values.map(([valueName, methods]) => {
+        const self = parameters[valueName];
 
-      let value = this._decorator(self);
-      for (const [methodName, methodArgs] of methods) {
-        const method = getSafeMethod(value, methodName);
-        if (method) {
-          value = method(
-            ...methodArgs.map((methodArg) => {
-              switch (methodArg[0]) {
-                case 2:
-                  return methodArg[1];
-                case 3:
-                  return methodArg[1];
-                case 4:
-                  return () =>
-                    this.executeAst(methodArg[1], { _: self, ...parameters });
-                default:
-                  throw new Error(
-                    `Unknown method argument type: ${methodArg[0]}`,
-                  );
-              }
-            }),
-          );
+        let value = this._decorator(self);
+        for (const [methodName, methodArgs] of methods) {
+          const method = getSafeMethod(value, methodName);
+          if (method) {
+            value = method(
+              ...methodArgs.map((methodArg) => {
+                switch (methodArg[0]) {
+                  case 2:
+                    return methodArg[1];
+                  case 3:
+                    return methodArg[1];
+                  case 4:
+                    return () =>
+                      this.executeAst(methodArg[1], { _: self, ...parameters });
+                  default:
+                    throw new Error(
+                      `Unknown method argument type: ${methodArg[0]}`,
+                    );
+                }
+              }),
+            );
+          }
         }
-      }
 
-      result += value && value.toString ? value.toString() : (value ?? "");
-      result += strings[valueIndex + 1] ?? "";
-    });
-    return result;
+        return value && value.toString ? value.toString() : (value ?? "");
+      }),
+    );
   }
 }
 

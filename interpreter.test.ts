@@ -32,8 +32,10 @@ Deno.test("interpreter, basic template value", () => {
 
 Deno.test("interpreter, template value with method", () => {
   const runtime = new Interpreter({
-    upper: (source, _, ctx) => `${ctx.out ?? source}`.toUpperCase(),
-    trim: (source, _, ctx) => `${ctx.out ?? source}`.trim(),
+    hooks: {
+      upper: (source, _, ctx) => `${ctx.out ?? source}`.toUpperCase(),
+      trim: (source, _, ctx) => `${ctx.out ?? source}`.trim(),
+    },
   });
 
   assertEquals(
@@ -85,7 +87,7 @@ Deno.test("interpreter, template value with method", () => {
 });
 
 Deno.test("interpreter, template with method that returns template", () => {
-  const runtime = new Interpreter(defaultHooks);
+  const runtime = new Interpreter({ hooks: defaultHooks });
 
   assertEquals(
     runtime.executeAst([
