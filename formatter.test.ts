@@ -1,6 +1,5 @@
 import { assertEquals } from "@std/assert/assert-equals";
 import { Formatter } from "./formatter.ts";
-import { defaultHooks } from "./plugins/default.ts";
 
 Deno.test("formatter, plural", () => {
   const messages = {
@@ -17,7 +16,6 @@ Deno.test("formatter, plural", () => {
   {
     const formatter = new Formatter({
       locale: "en",
-      hooks: defaultHooks,
     });
 
     assertEquals(
@@ -37,7 +35,6 @@ Deno.test("formatter, plural", () => {
   {
     const formatter = new Formatter({
       locale: "ko",
-      hooks: defaultHooks,
       messages: messages.ko,
     });
 
@@ -51,7 +48,6 @@ Deno.test("formatter, plural", () => {
   {
     const formatter = new Formatter({
       locale: "ar",
-      hooks: defaultHooks,
       messages: messages.ar,
     });
 
