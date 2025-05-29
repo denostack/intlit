@@ -127,8 +127,3 @@ console.log(
   formatter.format("You have {count} file{count.other:}s{/}.", { count: 100 }),
 ); // Output: لديك 100 ملفات.
 ```
-
-### Message Format for Plurals
-
-The library uses a specific format for pluralization within the message string
-itself, which simplifies key management. Unlike traditional `gettext`
