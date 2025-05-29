@@ -10,7 +10,7 @@ Deno.test("formatter, plural", () => {
     },
     ar: {
       "You have {count} file{count.other:}s{/}.":
-        "{count.zero:}لا يوجد لديك ملفات.{.one:}لديك ملف واحد.{.two:}لديك ملفان.{.few:}لديك {count} ملفات قليلة.{.many:}لديك {count} ملفات كثيرة.{.other:}لديك {count} ملفات.{/}",
+        "{count.zero:}لا يوجد لديك ملفات.{.one:}لديك ملف واحد.{.two:}لديك ملفان.{.few:}لديك {_} ملفات قليلة.{.many:}لديك {_} ملفات كثيرة.{.other:}لديك {_} ملفات.{/}",
     },
   };
 
