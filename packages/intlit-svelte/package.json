@@ -1,0 +1,45 @@
+{
+  "name": "@denostack/intlit-svelte",
+  "version": "0.0.0",
+  "description": "Svelte integration for IntLit",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "vite build",
+    "test": "vitest",
+    "lint": "eslint src --ext .ts,.tsx",
+    "format": "prettier --write \"src/**/*.{ts,tsx}\""
+  },
+  "keywords": [
+    "intl",
+    "formatter",
+    "i18n",
+    "gettext",
+    "svelte"
+  ],
+  "license": "MIT",
+  "peerDependencies": {
+    "svelte": "^4.0.0"
+  },
+  "dependencies": {
+    "intlit-core": "file:../intlit-core"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^3.0.0",
+    "jsdom": "^26.1.0",
+    "svelte": "^4.0.0",
+    "vite": "^5.0.0",
+    "vitest": "^1.3.1"
+  }
+}
