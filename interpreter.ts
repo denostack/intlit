@@ -54,7 +54,9 @@ export class Interpreter implements Runtime {
   executeAst(ast: AstTemplate, parameters: FormatParameters): string {
     const [strings, values] = ast;
     return this._taggedTemplate(
-      Object.assign(strings, { raw: strings }),
+      Object.assign(strings, {
+        raw: strings.map((string) => String.raw`${string}`),
+      }),
       ...values.map(([valueName, methods]) => {
         const self = parameters[valueName];
 
